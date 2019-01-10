@@ -8,6 +8,9 @@ pub enum Opcode {
     SUB,
     MUL,
     DIV,
+    JMP,
+    JMPF,
+    JMPB,
     IGL,
 }
 
@@ -21,6 +24,9 @@ impl fmt::Display for Opcode {
             Opcode::SUB => "sub",
             Opcode::MUL => "mul",
             Opcode::DIV => "div",
+            Opcode::JMP => "jmp",
+            Opcode::JMPF => "jmpf",
+            Opcode::JMPB => "jmpb",
         };
 
         write!(f, "{}", opcode)
@@ -36,6 +42,9 @@ impl From<u8> for Opcode {
             0x03 => Opcode::SUB,
             0x04 => Opcode::MUL,
             0x05 => Opcode::DIV,
+            0x06 => Opcode::JMP,
+            0x07 => Opcode::JMPF,
+            0x08 => Opcode::JMPB,
             _ => Opcode::IGL,
         }
     }
