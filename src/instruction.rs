@@ -1,18 +1,36 @@
+use std::fmt;
+
 #[derive(Debug, PartialEq)]
 pub enum Opcode {
+    IGL,
     HLT,
-    IGL
+}
+
+impl fmt::Display for Opcode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Opcode::HLT => write!(f, "hlt"),
+            Opcode::IGL => write!(f, "illegal"),
+        }
+    }
+}
+
+impl From<u8> for Opcode {
+    fn from(v: u8) -> Self {
+        match v {
+            0 => Opcode::HLT,
+            _ => Opcode::IGL,
+        }
+    }
 }
 
 pub struct Instruction {
-    opcode: Opcode
+    opcode: Opcode,
 }
 
 impl Instruction {
     pub fn new(opcode: Opcode) -> Self {
-        Instruction {
-            opcode: opcode
-        }
+        Instruction { opcode: opcode }
     }
 }
 
