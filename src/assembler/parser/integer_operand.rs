@@ -2,7 +2,7 @@ use crate::assembler::Token;
 use nom::digit;
 use nom::types::CompleteStr;
 
-named!(parse_integer_operand<CompleteStr, Token>,
+named!(pub parse_integer_operand<CompleteStr, Token>,
     ws!(
         do_parse!(
             tag!("#") >>

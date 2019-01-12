@@ -84,6 +84,34 @@ impl From<u8> for Opcode {
         }
     }
 }
+
+impl Opcode {
+    pub fn to_u8(&self) -> u8 {
+        use self::Opcode::*;
+
+        match self {
+            HLT => 0x00,
+            LOAD => 0x01,
+            ADD => 0x02,
+            SUB => 0x03,
+            MUL => 0x04,
+            DIV => 0x05,
+            JMP => 0x06,
+            JMPF => 0x07,
+            JMPB => 0x08,
+            EQ => 0x09,
+            NEQ => 0x0A,
+            GT => 0x0B,
+            LT => 0x0C,
+            GTQ => 0x0D,
+            LTQ => 0x0E,
+            JEQ => 0x0F,
+            JNEQ => 0x10,
+            IGL(code) => *code,
+        }
+    }
+}
+
 #[allow(dead_code)]
 pub struct Instruction {
     opcode: Opcode,

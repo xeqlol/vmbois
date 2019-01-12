@@ -6,4 +6,4 @@ edition = "2018"
 
 [dependencies]
 cargo-husky = "1"
-nom = "^4.0"
+nom = "^4.1"

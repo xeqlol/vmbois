@@ -1,4 +1,6 @@
+use crate::assembler::parser::program::parse_program;
 use crate::vm::VM;
+use nom::types::CompleteStr;
 use std;
 use std::io;
 use std::io::Write;
@@ -45,17 +47,18 @@ impl Repl {
                 ".program" => self.handle_program(),
                 ".register" => self.handle_registers(),
                 _ => {
-                    let results = self.parse_hex(buffer);
+                    let parsed_program = parse_program(CompleteStr(buffer));
 
-                    match results {
-                        Ok(bytes) => {
-                            for byte in bytes {
-                                self.vm.add_byte(byte)
-                            }
-                        }
-                        Err(_) => {
-                            println!("Unable to decode hex string. Please enter 4 groups of 2 hex characters.", )
-                        }
+                    if parsed_program.is_err() {
+                        println!("Unable to parse input");
+                        continue;
+                    }
+
+                    let (_, result) = parsed_program.unwrap();
+                    let bytecode = result.to_bytes();
+
+                    for byte in bytecode {
+                        self.vm.add_byte(byte);
                     }
 
                     self.vm.run_once();
@@ -86,6 +89,7 @@ impl Repl {
         println!("End of regicster listing");
     }
 
+    #[allow(dead_code)]
     fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
         let split = i.split(' ').collect::<Vec<&str>>();
         let mut results: Vec<u8> = vec![];
