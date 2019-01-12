@@ -2,9 +2,9 @@ use super::instruction::Opcode;
 
 #[derive(Debug, Default)]
 pub struct VM {
-    registers: [i32; 32],
+    pub registers: [i32; 32],
     pc: usize,
-    program: Vec<u8>,
+    pub program: Vec<u8>,
     remainder: u32,
     equal_flag: bool,
 }
@@ -210,6 +210,10 @@ impl VM {
         self.pc += 1;
 
         opcode
+    }
+
+    pub fn add_byte(&mut self, byte: u8) {
+        self.program.push(byte);
     }
 }
 
