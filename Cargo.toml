@@ -5,3 +5,8 @@ authors = ["Dimitrii Nemkov <xeqlol@yandex-team.ru>"]
 edition = "2018"
 
 [dependencies]
+cargo-husky = "1"
+
+[dev-dependencies.cargo-husky]
+version = "1"
+features = ["precommit-hook", "run-cargo-test", "run-cargo-clippy"]

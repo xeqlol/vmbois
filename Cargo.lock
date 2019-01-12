@@ -1,4 +1,14 @@
 [[package]]
+name = "cargo-husky"
+version = "1.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "iridium"
 version = "0.1.0"
+dependencies = [
+ "cargo-husky 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
+[metadata]
+"checksum cargo-husky 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "fbfc091f50aebd54f00e6501772fbec6163d1847bf8ab0b191bf550453617370"
