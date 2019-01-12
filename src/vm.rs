@@ -32,57 +32,15 @@ impl VM {
         }
 
         match self.decode_opcode() {
-            Opcode::HLT => {
-                println!("HLT encountered");
-
-                return false;
-            }
-            Opcode::LOAD => {
-                let register = self.next_8_bits() as usize;
-                let number = self.next_16_bits() as u16;
-
-                self.registers[register] = number as i32;
-            }
-            Opcode::ADD => {
-                let register1 = self.registers[self.next_8_bits() as usize];
-                let register2 = self.registers[self.next_8_bits() as usize];
-
-                self.registers[self.next_8_bits() as usize] = register1 + register2;
-            }
-            Opcode::SUB => {
-                let register1 = self.registers[self.next_8_bits() as usize];
-                let register2 = self.registers[self.next_8_bits() as usize];
-
-                self.registers[self.next_8_bits() as usize] = register1 - register2;
-            }
-            Opcode::MUL => {
-                let register1 = self.registers[self.next_8_bits() as usize];
-                let register2 = self.registers[self.next_8_bits() as usize];
-
-                self.registers[self.next_8_bits() as usize] = register1 * register2;
-            }
-            Opcode::DIV => {
-                let register1 = self.registers[self.next_8_bits() as usize];
-                let register2 = self.registers[self.next_8_bits() as usize];
-
-                self.registers[self.next_8_bits() as usize] = register1 / register2;
-                self.remainder = (register1 % register2) as u32;
-            }
-            Opcode::JMP => {
-                let target = self.registers[self.next_8_bits() as usize];
-
-                self.pc = target as usize;
-            }
-            Opcode::JMPF => {
-                let target = self.registers[self.next_8_bits() as usize];
-
-                self.pc += target as usize;
-            }
-            Opcode::JMPB => {
-                let target = self.registers[self.next_8_bits() as usize];
-
-                self.pc -= target as usize;
-            }
+            Opcode::HLT => return self.handle_hlt(),
+            Opcode::LOAD => self.handle_load(),
+            Opcode::ADD => self.handle_add(),
+            Opcode::SUB => self.handle_sub(),
+            Opcode::MUL => self.handle_mul(),
+            Opcode::DIV => self.handle_div(),
+            Opcode::JMP => self.handle_jmp(),
+            Opcode::JMPF => self.handle_jmpf(),
+            Opcode::JMPB => self.handle_jmpb(),
             op @ _ => {
                 println!("Unexpected {} opcode at {}", op, self.pc);
 
@@ -91,6 +49,66 @@ impl VM {
         }
 
         true
+    }
+
+    fn handle_hlt(&self) -> bool {
+        println!("HLT encountered");
+
+        return false;
+    }
+
+    fn handle_load(&mut self) {
+        let register = self.next_8_bits() as usize;
+        let number = self.next_16_bits() as u16;
+
+        self.registers[register] = number as i32;
+    }
+
+    fn handle_add(&mut self) {
+        let register1 = self.registers[self.next_8_bits() as usize];
+        let register2 = self.registers[self.next_8_bits() as usize];
+
+        self.registers[self.next_8_bits() as usize] = register1 + register2;
+    }
+
+    fn handle_sub(&mut self) {
+        let register1 = self.registers[self.next_8_bits() as usize];
+        let register2 = self.registers[self.next_8_bits() as usize];
+
+        self.registers[self.next_8_bits() as usize] = register1 - register2;
+    }
+
+    fn handle_mul(&mut self) {
+        let register1 = self.registers[self.next_8_bits() as usize];
+        let register2 = self.registers[self.next_8_bits() as usize];
+
+        self.registers[self.next_8_bits() as usize] = register1 * register2;
+    }
+
+    fn handle_div(&mut self) {
+        let register1 = self.registers[self.next_8_bits() as usize];
+        let register2 = self.registers[self.next_8_bits() as usize];
+
+        self.registers[self.next_8_bits() as usize] = register1 / register2;
+        self.remainder = (register1 % register2) as u32;
+    }
+
+    fn handle_jmp(&mut self) {
+        let target = self.registers[self.next_8_bits() as usize];
+
+        self.pc = target as usize;
+    }
+
+    fn handle_jmpf(&mut self) {
+        let target = self.registers[self.next_8_bits() as usize];
+
+        self.pc += target as usize;
+    }
+
+    fn handle_jmpb(&mut self) {
+        let target = self.registers[self.next_8_bits() as usize];
+
+        self.pc -= target as usize;
     }
 
     fn next_8_bits(&mut self) -> u8 {
