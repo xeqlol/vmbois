@@ -80,18 +80,18 @@ impl From<u8> for Opcode {
             0x0E => LTQ,
             0x0F => JEQ,
             0x10 => JNEQ,
-            code @ _ => IGL(code),
+            code => IGL(code),
         }
     }
 }
-
+#[allow(dead_code)]
 pub struct Instruction {
     opcode: Opcode,
 }
 
 impl Instruction {
     pub fn new(opcode: Opcode) -> Self {
-        Instruction { opcode: opcode }
+        Instruction { opcode }
     }
 }
 

@@ -1,6 +1,6 @@
 use super::instruction::Opcode;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct VM {
     registers: [i32; 32],
     pc: usize,
@@ -53,7 +53,7 @@ impl VM {
             LTQ => self.handle_ltq(),
             JEQ => self.handle_jeq(),
             JNEQ => self.handle_jneq(),
-            op @ _ => {
+            op => {
                 println!("Unexpected {} opcode at {}", op, self.pc);
 
                 return false;
@@ -66,14 +66,14 @@ impl VM {
     fn handle_hlt(&self) -> bool {
         println!("HLT encountered");
 
-        return false;
+        false
     }
 
     fn handle_load(&mut self) {
         let register = self.next_8_bits() as usize;
         let number = self.next_16_bits() as u16;
 
-        self.registers[register] = number as i32;
+        self.registers[register] = i32::from(number);
     }
 
     // TODO (xeqlol): keep DRY
@@ -199,7 +199,7 @@ impl VM {
     }
 
     fn next_16_bits(&mut self) -> u16 {
-        let result = ((self.program[self.pc] as u16) << 8) | self.program[self.pc + 1] as u16;
+        let result = (u16::from(self.program[self.pc]) << 8) | u16::from(self.program[self.pc + 1]);
         self.pc += 2;
 
         result
