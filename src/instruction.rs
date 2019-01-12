@@ -5,7 +5,7 @@ pub enum Opcode {
     HLT,
 
     LOAD,
-    
+
     ADD,
     SUB,
     MUL,
@@ -22,8 +22,9 @@ pub enum Opcode {
     GTQ,
     LTQ,
     JEQ,
+    JNEQ,
 
-    IGL,
+    IGL(u8),
 }
 
 impl fmt::Display for Opcode {
@@ -31,7 +32,9 @@ impl fmt::Display for Opcode {
         use self::Opcode::*;
 
         let opcode = match self {
-            IGL => "illegal",
+            IGL(code) => {
+                return write!(f, "0x{:02X?}", code);
+            }
             HLT => "hlt",
             LOAD => "load",
             ADD => "add",
@@ -47,7 +50,8 @@ impl fmt::Display for Opcode {
             LT => "lt",
             GTQ => "gtq",
             LTQ => "ltq",
-            JEQ => "jeq"
+            JEQ => "jeq",
+            JNEQ => "jneq",
         };
 
         write!(f, "{}", opcode)
@@ -68,7 +72,15 @@ impl From<u8> for Opcode {
             0x06 => JMP,
             0x07 => JMPF,
             0x08 => JMPB,
-            _ => IGL,
+            0x09 => EQ,
+            0x0A => NEQ,
+            0x0B => GT,
+            0x0C => LT,
+            0x0D => GTQ,
+            0x0E => LTQ,
+            0x0F => JEQ,
+            0x10 => JNEQ,
+            code @ _ => IGL(code),
         }
     }
 }
@@ -95,7 +107,7 @@ mod tests {
 
     #[test]
     fn test_create_igl() {
-        let inst = Instruction::new(Opcode::IGL);
-        assert_eq!(inst.opcode, Opcode::IGL);
+        let inst = Instruction::new(Opcode::IGL(0x01));
+        assert_eq!(inst.opcode, Opcode::IGL(0x01));
     }
 }
