@@ -7,6 +7,7 @@ pub struct VM {
     pub program: Vec<u8>,
     remainder: u32,
     equal_flag: bool,
+    heap: Vec<u8>,
 }
 
 impl VM {
@@ -17,6 +18,7 @@ impl VM {
             program: vec![],
             remainder: 0,
             equal_flag: false,
+            heap: vec![],
         }
     }
 
@@ -53,6 +55,7 @@ impl VM {
             LTQ => self.handle_ltq(),
             JEQ => self.handle_jeq(),
             JNEQ => self.handle_jneq(),
+            ALOC => self.handle_aloc(),
             op => {
                 println!("Unexpected {} opcode at {}", op, self.pc);
 
@@ -182,6 +185,13 @@ impl VM {
         if !self.equal_flag {
             self.pc = target as usize;
         }
+    }
+
+    fn handle_aloc(&mut self) {
+        let bytes = self.registers[self.next_8_bits() as usize];
+        let new_end = self.heap.len() as i32 + bytes;
+
+        self.heap.resize(new_end as usize, 0);
     }
 
     fn read_next_2_registers(&mut self) -> (i32, i32) {
@@ -443,5 +453,14 @@ mod tests {
         test_vm.program = vec![0x10, 0x00, 0x00, 0x00];
         test_vm.run_once();
         assert_eq!(test_vm.pc, 7);
+    }
+
+    #[test]
+    fn test_aloc_opcode() {
+        let mut test_vm = VM::new();
+        test_vm.registers[0] = 1024;
+        test_vm.program = vec![0x11, 0x00, 0x00, 0x00];
+        test_vm.run_once();
+        assert_eq!(test_vm.heap.len(), 1024);
     }
 }

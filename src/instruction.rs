@@ -4,18 +4,14 @@ use std::fmt;
 #[derive(Debug, PartialEq)]
 pub enum Opcode {
     HLT,
-
     LOAD,
-
     ADD,
     SUB,
     MUL,
     DIV,
-
     JMP,
     JMPF,
     JMPB,
-
     EQ,
     NEQ,
     GT,
@@ -24,6 +20,7 @@ pub enum Opcode {
     LTQ,
     JEQ,
     JNEQ,
+    ALOC,
 
     IGL(u8),
 }
@@ -53,6 +50,7 @@ impl fmt::Display for Opcode {
             LTQ => "ltq",
             JEQ => "jeq",
             JNEQ => "jneq",
+            ALOC => "aloc",
         };
 
         write!(f, "{}", opcode)
@@ -81,6 +79,7 @@ impl From<u8> for Opcode {
             0x0E => LTQ,
             0x0F => JEQ,
             0x10 => JNEQ,
+            0x11 => ALOC,
             code => IGL(code),
         }
     }
@@ -107,6 +106,7 @@ impl<'a> From<CompleteStr<'a>> for Opcode {
             CompleteStr("ltq") => LTQ,
             CompleteStr("lt") => LT,
             CompleteStr("jneq") => JNEQ,
+            CompleteStr("aloc") => ALOC,
             CompleteStr(_) => IGL(0xFF),
         }
     }
@@ -134,6 +134,7 @@ impl Opcode {
             LTQ => 0x0E,
             JEQ => 0x0F,
             JNEQ => 0x10,
+            ALOC => 0x11,
             IGL(code) => *code,
         }
     }
