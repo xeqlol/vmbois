@@ -14,6 +14,7 @@ named!(pub parse_integer_operand<CompleteStr, Token>,
     )
 );
 
+#[cfg(test)]
 mod tests {
     #[allow(unused_imports)]
     use super::*;

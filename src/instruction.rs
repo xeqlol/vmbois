@@ -1,3 +1,4 @@
+use nom::types::CompleteStr;
 use std::fmt;
 
 #[derive(Debug, PartialEq)]
@@ -85,6 +86,32 @@ impl From<u8> for Opcode {
     }
 }
 
+impl<'a> From<CompleteStr<'a>> for Opcode {
+    fn from(v: CompleteStr<'a>) -> Self {
+        use self::Opcode::*;
+
+        match v {
+            CompleteStr("load") => LOAD,
+            CompleteStr("add") => ADD,
+            CompleteStr("sub") => SUB,
+            CompleteStr("mul") => MUL,
+            CompleteStr("div") => DIV,
+            CompleteStr("hlt") => HLT,
+            CompleteStr("jmp") => JMP,
+            CompleteStr("jmpf") => JMPF,
+            CompleteStr("jmpb") => JMPB,
+            CompleteStr("eq") => EQ,
+            CompleteStr("neq") => NEQ,
+            CompleteStr("gtq") => GTQ,
+            CompleteStr("gt") => GT,
+            CompleteStr("ltq") => LTQ,
+            CompleteStr("lt") => LT,
+            CompleteStr("jneq") => JNEQ,
+            CompleteStr(_) => IGL(0xFF),
+        }
+    }
+}
+
 impl Opcode {
     pub fn to_u8(&self) -> u8 {
         use self::Opcode::*;
@@ -137,5 +164,13 @@ mod tests {
     fn test_create_igl() {
         let inst = Instruction::new(Opcode::IGL(0x01));
         assert_eq!(inst.opcode, Opcode::IGL(0x01));
+    }
+
+    #[test]
+    fn tets_str_to_opcode() {
+        let opcode = Opcode::from(CompleteStr("load"));
+        assert_eq!(opcode, Opcode::LOAD);
+        let opcode = Opcode::from(CompleteStr("illegal"));
+        assert_eq!(opcode, Opcode::IGL(0xFF));
     }
 }

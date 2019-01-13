@@ -2,6 +2,7 @@ use super::integer_operand::parse_integer_operand;
 use super::opcode::parse_opcode;
 use super::register::parse_register;
 use crate::assembler::Token;
+use nom::multispace;
 use nom::types::CompleteStr;
 
 #[derive(Debug, PartialEq)]
@@ -73,7 +74,52 @@ named!(pub parse_instruction_one<CompleteStr, AssemblerInstruction>,
     )
 );
 
+#[allow(dead_code)]
+named!(pub parse_instruction_two<CompleteStr, AssemblerInstruction>,
+    do_parse!(
+        o: parse_opcode >>
+        opt!(multispace) >>
+        (
+            AssemblerInstruction {
+                opcode: o,
+                operand1: None,
+                operand2: None,
+                operand3: None
+            }
+        )
+    )
+);
+
+named!(pub parse_instruction_three<CompleteStr, AssemblerInstruction>,
+    do_parse!(
+        o: parse_opcode >>
+        r1: parse_register >>
+        r2: parse_register >>
+        r3: parse_register >>
+        (
+            AssemblerInstruction {
+                opcode: o,
+                operand1: Some(r1),
+                operand2: Some(r2),
+                operand3: Some(r3)
+            }
+        )
+    )
+);
+
+named!(pub parse_instruction<CompleteStr, AssemblerInstruction>,
+    do_parse!(
+        ins: alt!(
+            parse_instruction_one | parse_instruction_two | parse_instruction_three
+        ) >>
+        (
+            ins
+        )
+    )
+);
+
 #[allow(unused_imports)]
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::assembler::Token;
@@ -81,10 +127,10 @@ mod tests {
 
     #[test]
     fn test_parse_instruction_one() {
-        let result = parse_instruction_one(CompleteStr("load $0 #100\n")).unwrap();
+        let result = parse_instruction_one(CompleteStr("load $0 #100\n"));
         assert_eq!(
             result,
-            (
+            Ok((
                 CompleteStr(""),
                 AssemblerInstruction {
                     opcode: Token::Op { code: Opcode::LOAD },
@@ -92,7 +138,24 @@ mod tests {
                     operand2: Some(Token::IntegerOperand { value: 100 }),
                     operand3: None
                 }
-            )
+            ))
         );
+    }
+
+    #[test]
+    fn test_parse_instruction_two() {
+        let result = parse_instruction_two(CompleteStr("hlt\n"));
+        assert_eq!(
+            result,
+            Ok((
+                CompleteStr(""),
+                AssemblerInstruction {
+                    opcode: Token::Op { code: Opcode::HLT },
+                    operand1: None,
+                    operand2: None,
+                    operand3: None
+                }
+            ))
+        )
     }
 }

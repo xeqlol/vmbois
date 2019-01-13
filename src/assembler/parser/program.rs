@@ -1,4 +1,4 @@
-use super::instruction::{parse_instruction_one, AssemblerInstruction};
+use super::instruction::{parse_instruction, AssemblerInstruction};
 use nom::many1;
 use nom::types::CompleteStr;
 
@@ -21,7 +21,7 @@ impl Program {
 
 named!(pub parse_program<CompleteStr, Program>,
     do_parse!(
-        instructions: many1!(parse_instruction_one) >>
+        instructions: many1!(parse_instruction) >>
         (
             Program {
                 instructions
@@ -30,6 +30,7 @@ named!(pub parse_program<CompleteStr, Program>,
     )
 );
 
+#[cfg(test)]
 mod test {
     #[allow(unused_imports)]
     use super::*;

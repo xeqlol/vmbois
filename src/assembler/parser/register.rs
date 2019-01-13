@@ -16,6 +16,7 @@ named!(pub parse_register<CompleteStr, Token>,
     )
 );
 
+#[cfg(test)]
 mod tests {
     #[allow(unused_imports)]
     use super::*;
