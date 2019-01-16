@@ -1,16 +1,18 @@
-use super::integer_operand::parse_integer_operand;
+use super::directive::parse_directive;
+use super::integer_operand::parse_operand;
+use super::label::parse_label_declaration;
 use super::opcode::parse_opcode;
-use super::register::parse_register;
 use crate::assembler::Token;
-use nom::multispace;
 use nom::types::CompleteStr;
 
 #[derive(Debug, PartialEq)]
 pub struct AssemblerInstruction {
-    opcode: Token,
-    operand1: Option<Token>,
-    operand2: Option<Token>,
-    operand3: Option<Token>,
+    pub opcode: Option<Token>,
+    pub label: Option<Token>,
+    pub directive: Option<Token>,
+    pub operand1: Option<Token>,
+    pub operand2: Option<Token>,
+    pub operand3: Option<Token>,
 }
 
 impl AssemblerInstruction {
@@ -18,7 +20,7 @@ impl AssemblerInstruction {
         let mut result = vec![];
 
         match &self.opcode {
-            Token::Op { code } => {
+            Some(Token::Op { code }) => {
                 result.push(code.to_u8());
             }
             _ => {
@@ -58,62 +60,34 @@ impl AssemblerInstruction {
     }
 }
 
-named!(pub parse_instruction_one<CompleteStr, AssemblerInstruction>,
-    do_parse!(
-        o: parse_opcode >>
-        r: parse_register >>
-        i: parse_integer_operand >>
-        (
-            AssemblerInstruction {
-                opcode: o,
-                operand1: Some(r),
-                operand2: Some(i),
-                operand3: None
-            }
-        )
-    )
-);
-
-#[allow(dead_code)]
-named!(pub parse_instruction_two<CompleteStr, AssemblerInstruction>,
-    do_parse!(
-        o: parse_opcode >>
-        opt!(multispace) >>
-        (
-            AssemblerInstruction {
-                opcode: o,
-                operand1: None,
-                operand2: None,
-                operand3: None
-            }
-        )
-    )
-);
-
-named!(pub parse_instruction_three<CompleteStr, AssemblerInstruction>,
-    do_parse!(
-        o: parse_opcode >>
-        r1: parse_register >>
-        r2: parse_register >>
-        r3: parse_register >>
-        (
-            AssemblerInstruction {
-                opcode: o,
-                operand1: Some(r1),
-                operand2: Some(r2),
-                operand3: Some(r3)
-            }
-        )
-    )
-);
-
 named!(pub parse_instruction<CompleteStr, AssemblerInstruction>,
     do_parse!(
         ins: alt!(
-            parse_instruction_one | parse_instruction_two | parse_instruction_three
+            parse_instruction_combined |
+            parse_directive
         ) >>
         (
             ins
+        )
+    )
+);
+
+named!(parse_instruction_combined<CompleteStr, AssemblerInstruction>,
+    do_parse!(
+        l: opt!(parse_label_declaration) >>
+        o: parse_opcode >>
+        o1: opt!(parse_operand) >>
+        o2: opt!(parse_operand) >>
+        o3: opt!(parse_operand) >>
+        (
+            AssemblerInstruction {
+                opcode: Some(o),
+                label: l,
+                directive: None,
+                operand1: o1,
+                operand2: o2,
+                operand3: o3
+            }
         )
     )
 );
@@ -127,16 +101,18 @@ mod tests {
 
     #[test]
     fn test_parse_instruction_one() {
-        let result = parse_instruction_one(CompleteStr("load $0 #100\n"));
+        let result = parse_instruction_combined(CompleteStr("load $0 #100\n"));
         assert_eq!(
             result,
             Ok((
                 CompleteStr(""),
                 AssemblerInstruction {
-                    opcode: Token::Op { code: Opcode::LOAD },
+                    opcode: Some(Token::Op { code: Opcode::LOAD }),
                     operand1: Some(Token::Register { reg_num: 0 }),
                     operand2: Some(Token::IntegerOperand { value: 100 }),
-                    operand3: None
+                    operand3: None,
+                    label: None,
+                    directive: None
                 }
             ))
         );
@@ -144,16 +120,18 @@ mod tests {
 
     #[test]
     fn test_parse_instruction_two() {
-        let result = parse_instruction_two(CompleteStr("hlt\n"));
+        let result = parse_instruction_combined(CompleteStr("hlt"));
         assert_eq!(
             result,
             Ok((
                 CompleteStr(""),
                 AssemblerInstruction {
-                    opcode: Token::Op { code: Opcode::HLT },
+                    opcode: Some(Token::Op { code: Opcode::HLT }),
                     operand1: None,
                     operand2: None,
-                    operand3: None
+                    operand3: None,
+                    label: None,
+                    directive: None
                 }
             ))
         )

@@ -2,8 +2,10 @@ use crate::assembler::parser::program::parse_program;
 use crate::vm::VM;
 use nom::types::CompleteStr;
 use std;
+use std::fs::File;
 use std::io;
-use std::io::Write;
+use std::io::{Read, Write};
+use std::path::Path;
 
 #[derive(Default)]
 #[allow(dead_code)]
@@ -46,6 +48,8 @@ impl Repl {
                 ".history" => self.handle_history(),
                 ".program" => self.handle_program(),
                 ".register" => self.handle_registers(),
+                ".load_file" => self.handle_load_file(),
+                ".clear" => self.handle_clear(),
                 _ => {
                     let parsed_program = parse_program(CompleteStr(buffer));
 
@@ -89,6 +93,41 @@ impl Repl {
         println!("End of regicster listing");
     }
 
+    fn handle_clear(&mut self) {
+        println!("Clearing program vector");
+        self.vm.program = vec![];
+    }
+
+    fn handle_load_file(&mut self) {
+        print!("Please enter the path to the file you wish to load: ");
+        io::stdout().flush().expect("Unable to flush stdout");
+
+        let mut tmp = String::new();
+
+        io::stdin()
+            .read_line(&mut tmp)
+            .expect("Unable to read line from user");
+
+        let tmp = tmp.trim();
+        let filename = Path::new(&tmp);
+        let mut f = File::open(Path::new(&filename)).expect("File not found");
+        let mut contents = String::new();
+
+        f.read_to_string(&mut contents)
+            .expect("There was an error reading from the file");
+        
+        let program = match parse_program(CompleteStr(&contents)) {
+            Ok((_, program)) => program,
+            Err(e) => {
+                println!("Unable to parse input: {:?}", e);
+
+                return;
+            }
+        };
+
+        self.vm.program.append(&mut program.to_bytes());
+    }
+
     #[allow(dead_code)]
     fn parse_hex(&mut self, i: &str) -> Result<Vec<u8>, std::num::ParseIntError> {
         let split = i.split(' ').collect::<Vec<&str>>();
@@ -96,6 +135,7 @@ impl Repl {
 
         for hex_string in split {
             let result = u8::from_str_radix(&hex_string, 16)?;
+
             results.push(result);
         }
 
